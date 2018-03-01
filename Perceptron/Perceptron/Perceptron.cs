@@ -6,16 +6,22 @@ using System.Threading.Tasks;
 
 namespace Perceptron
 {
+    /// <summary>
+    /// A simple machine learning algorithm. This perceptron has only one 'brain cell'
+    /// and can only solve linearly seperable problems. Classifies labels as 1 or -1 based 
+    /// on the weights added together.
+    /// </summary>
     class Perceptron
     {
         float[] weights;
         float learningRate;
 
         /// <summary>
-        /// Perceptron is a basic single input classification class. Takes number of weights and returns output
-        /// of 1 or -1 based on the classification it comes up with.
+        /// Perceptron is a basic single input classification class. Takes number of weights 
+        /// and returns output of 1 or -1 based on the classification it comes up with.
         /// </summary>
         /// <param name="numWeights">How many weights should there be? Defaults to 2 if none passed.</param>
+        /// <param name="learning">The learning rate for this perceptron. Defaults to 0.01f.</param>
         public Perceptron(int numWeights = 2, float learning = 0.01f)
         {
             learningRate = learning;
@@ -47,10 +53,11 @@ namespace Perceptron
         }
 
         /// <summary>
-        /// 
+        /// Train the perceptron by adjusting the weights in the brain. Tunes
+        /// weights based on the error from the inputs and the target value.
         /// </summary>
-        /// <param name="inputs"></param>
-        /// <param name="target"></param>
+        /// <param name="inputs">Training inputs.</param>
+        /// <param name="target">What the answer should be.</param>
         public void TrainPerceptron(float[] inputs, int target)
         {
             int guess = TakeAGuess(inputs);
