@@ -9,14 +9,16 @@ namespace Perceptron
     class Perceptron
     {
         float[] weights;
+        float learningRate;
 
         /// <summary>
         /// Perceptron is a basic single input classification class. Takes number of weights and returns output
         /// of 1 or -1 based on the classification it comes up with.
         /// </summary>
         /// <param name="numWeights">How many weights should there be? Defaults to 2 if none passed.</param>
-        public Perceptron(int numWeights = 2)
+        public Perceptron(int numWeights = 2, float learning = 0.01f)
         {
+            learningRate = learning;
             weights = new float[numWeights];
             Random rand = new Random();
             rand.Next();
@@ -45,6 +47,24 @@ namespace Perceptron
         }
 
         /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="inputs"></param>
+        /// <param name="target"></param>
+        public void TrainPerceptron(float[] inputs, int target)
+        {
+            int guess = TakeAGuess(inputs);
+            //how much is the perceptron off by
+            int error = target - guess;
+
+            //tune all weights from error
+            for (int i = 0; i < weights.Length; i++)
+            {
+                weights[i] += error * inputs[i] * learningRate;
+            }
+        }
+
+        /// <summary>
         /// Checks if the value is greater than or equal to zero and returns either 1 or -1.
         /// </summary>
         /// <param name="value">The value to be checked.</param>
@@ -53,6 +73,7 @@ namespace Perceptron
         {
             return value >= 0 ? 1 : -1;
         }
+
     }
 
 }

@@ -10,11 +10,21 @@ using System.Windows.Forms;
 
 namespace Perceptron
 {
-    public partial class Form1 : Form
+    public partial class PerceptronForm : Form
     {
-        public Form1()
+        public PerceptronForm()
         {
             InitializeComponent();
+        }
+
+        private void tableLayoutPanel1_Paint(object sender, PaintEventArgs e)
+        {
+
+        }
+
+        private void tableLayoutPanel1_Paint_1(object sender, PaintEventArgs e)
+        {
+            
         }
     }
 }
