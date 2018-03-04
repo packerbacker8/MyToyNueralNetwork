@@ -10,6 +10,7 @@ namespace RCWNeuralNetwork
     {
         private int numInputNodes;
         private int numHiddenNodes;
+        private int numHiddenLayers;
         private int numOutputNodes;
 
         /// <summary>
@@ -19,14 +20,16 @@ namespace RCWNeuralNetwork
         {
             numInputNodes = 2;
             numHiddenNodes = 2;
+            numHiddenLayers = 1;
             numOutputNodes = 1;
         }
 
-        public NeuralNetwork(int numI, int numH, int numO)
+        public NeuralNetwork(int numI, int numH, int numO, int layers = 1)
         {
             numInputNodes = numI;
             numHiddenNodes = numH;
             numOutputNodes = numO;
+            numHiddenLayers = layers;
         }
     }
 }
