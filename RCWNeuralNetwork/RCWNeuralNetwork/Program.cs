@@ -13,7 +13,7 @@ namespace RCWNeuralNetwork
             MyMatrix matrix = new MyMatrix(4, 3, 1);
             matrix.ScaleMatrix(4);
             MyMatrix matrix2 = new MyMatrix(4, 3, 2);
-            matrix2.RandomizeMatrix(0,20);
+            matrix2.RandomizeMatrix(0, 20);
             matrix += matrix2;
             Console.WriteLine(matrix.ToString());
 
@@ -36,6 +36,17 @@ namespace RCWNeuralNetwork
             Console.WriteLine(d.ToString());
             d.ApplyFuncToMatrix((x, i, j) => i > j ? x * 2.2f : x + 3.1f);
             Console.WriteLine(d.ToString());
+
+            NeuralNetwork nn = new NeuralNetwork(2, 2, 1);
+            float[] input = new float[] { 1, 0 };
+            float[] targets = new float[] { 1 };
+
+            nn.TrainNetwork(input, targets);
+            /*float[] output = nn.FeedForward(input);
+            foreach(float ans in output)
+            {
+                Console.WriteLine(ans);
+            }*/
         }
     }
 }

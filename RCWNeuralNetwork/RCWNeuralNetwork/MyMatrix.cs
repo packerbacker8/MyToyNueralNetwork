@@ -66,6 +66,23 @@ namespace RCWNeuralNetwork
         }
 
         /// <summary>
+        /// Randomize the values in the matrix, this time using Random.NextDouble(). Returns between zero
+        /// and 1.  Use factor to increase this range, and shift to move the start and end value.
+        /// </summary>
+        /// <param name="factor">How much to scale up range of random numbers.</param>
+        /// <param name="shift">How much to shift over set of random numbers, defaults to 0.</param>
+        public void RandomizeMatrix(float factor, float shift = 0)
+        {
+            for (int i = 0; i < rows; i++)
+            {
+                for (int j = 0; j < cols; j++)
+                {
+                    internalMatrix[i, j] = ((float)rand.NextDouble() * factor) - shift;
+                }
+            }
+        }
+
+        /// <summary>
         /// Set the named label of this matrix.
         /// </summary>
         /// <param name="name">What the new name will be.</param>
@@ -181,6 +198,32 @@ namespace RCWNeuralNetwork
         }
 
         /// <summary>
+        /// Subtract element wise two matricies and get back a new matrix.
+        /// Matricies need to be same dimensions, otherwise returns null.
+        /// </summary>
+        /// <param name="first">Matrix to be subtracted from.</param>
+        /// <param name="second">Matrix values that are doing the subtracting.</param>
+        /// <returns>A new matrix where first - second happens.</returns>
+        public static MyMatrix SubtractTwoMatricies(MyMatrix first, MyMatrix second)
+        {
+            if (first.rows != second.rows || first.cols != second.cols)
+            {
+                //does nothing as they are not the same dimension
+                return null;
+            }
+            MyMatrix result = new MyMatrix(first.rows, first.cols, first.name + "-" + second.name);
+            for (int i = 0; i < result.rows; i++)
+            {
+                for (int j = 0; j < result.cols; j++)
+                {
+
+                    result.internalMatrix[i, j] = first.internalMatrix[i, j] - second.internalMatrix[i,j];
+                }
+            }
+            return result;
+        }
+
+        /// <summary>
         /// Perform matrix product on this matrix and one passed into the function.
         /// Returns a new matrix object that has the dimensions of this rows and
         /// the passed in columns. This columns and the other matrix rows must match
@@ -274,7 +317,9 @@ namespace RCWNeuralNetwork
             return result;
         }
 
-        public delegate float MatrixFunc(float val, int i, int j);
+        public delegate float MatrixFunc2(float val, int i, int j);
+        public delegate float MatrixFunc1(float val);
+
 
         /// <summary>
         /// Takes in a function delegate of the signature 'float FuncName(float, int, int)' 
@@ -282,7 +327,24 @@ namespace RCWNeuralNetwork
         /// operation.
         /// </summary>
         /// <param name="func">Dlegate function that is applied to each element in the matrix. Return type float, arg1=float, arg2=int, arg3=int</param>
-        public void ApplyFuncToMatrix(MatrixFunc func)
+        public void ApplyFuncToMatrix(MatrixFunc1 func)
+        {
+            for (int i = 0; i < this.rows; i++)
+            {
+                for (int j = 0; j < this.cols; j++)
+                {
+                    this.internalMatrix[i, j] = func(this.internalMatrix[i, j]);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Takes in a function delegate of the signature 'float FuncName(float, int, int)' 
+        /// and applies the function to each value in the matrix. This is an in place matrix
+        /// operation.
+        /// </summary>
+        /// <param name="func">Dlegate function that is applied to each element in the matrix. Return type float, arg1=float, arg2=int, arg3=int</param>
+        public void ApplyFuncToMatrix(MatrixFunc2 func)
         {
             for (int i = 0; i < this.rows; i++)
             {
@@ -291,6 +353,29 @@ namespace RCWNeuralNetwork
                     this.internalMatrix[i, j] = func(this.internalMatrix[i, j], i, j);
                 }
             }
+        }
+
+        public static MyMatrix FromArray(float[] inputs, string label ="inputs")
+        {
+            MyMatrix output = new MyMatrix(inputs.Length, 1, label);
+            for (int i = 0; i < inputs.Length; i++)
+            {
+                output.internalMatrix[i, 0] = inputs[i];
+            }
+            return output;
+        }
+
+        public float[] ToArray()
+        {
+            float[] res = new float[this.cols * this.rows];
+            for (int i = 0; i < this.rows; i++)
+            {
+                for (int j = 0; j < this.cols; j++)
+                {
+                    res[this.cols * i + j] = this.internalMatrix[i, j];
+                }
+            }
+            return res;
         }
 
         /// <summary>
@@ -346,7 +431,7 @@ namespace RCWNeuralNetwork
             {
                 for (int j = 0; j < output.cols; j++)
                 {
-                    output.internalMatrix[i, j] = left.internalMatrix[i, j] + right.internalMatrix[i, j];
+                    output.internalMatrix[i, j] = left.internalMatrix[i, j] - right.internalMatrix[i, j];
                 }
             }
             return output;
