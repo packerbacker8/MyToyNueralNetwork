@@ -223,6 +223,42 @@ namespace RCWNeuralNetwork
             return result;
         }
 
+        public void ElementWiseProduct(MyMatrix other)
+        {
+            if (this.rows != other.rows || this.cols != other.cols)
+            {
+                //does nothing as they are not the same dimension
+                return;
+            }
+            for (int i = 0; i < this.rows; i++)
+            {
+                for (int j = 0; j < this.cols; j++)
+                {
+
+                    this.internalMatrix[i, j] = this.internalMatrix[i, j] * other.internalMatrix[i, j];
+                }
+            }
+        }
+
+        public static MyMatrix ElementWiseProduct(MyMatrix first, MyMatrix second)
+        {
+            if (first.rows != second.rows || first.cols != second.cols)
+            {
+                //does nothing as they are not the same dimension
+                return null;
+            }
+            MyMatrix result = new MyMatrix(first.rows, first.cols, first.name + "_times_" + second.name);
+            for (int i = 0; i < result.rows; i++)
+            {
+                for (int j = 0; j < result.cols; j++)
+                {
+
+                    result.internalMatrix[i, j] = first.internalMatrix[i, j] * second.internalMatrix[i, j];
+                }
+            }
+            return result;
+        }
+
         /// <summary>
         /// Perform matrix product on this matrix and one passed into the function.
         /// Returns a new matrix object that has the dimensions of this rows and
@@ -326,7 +362,7 @@ namespace RCWNeuralNetwork
         /// and applies the function to each value in the matrix. This is an in place matrix
         /// operation.
         /// </summary>
-        /// <param name="func">Dlegate function that is applied to each element in the matrix. Return type float, arg1=float, arg2=int, arg3=int</param>
+        /// <param name="func">Delegate function that is applied to each element in the matrix. Return type float, arg1=float, arg2=int, arg3=int</param>
         public void ApplyFuncToMatrix(MatrixFunc1 func)
         {
             for (int i = 0; i < this.rows; i++)
@@ -343,7 +379,7 @@ namespace RCWNeuralNetwork
         /// and applies the function to each value in the matrix. This is an in place matrix
         /// operation.
         /// </summary>
-        /// <param name="func">Dlegate function that is applied to each element in the matrix. Return type float, arg1=float, arg2=int, arg3=int</param>
+        /// <param name="func">Delegate function that is applied to each element in the matrix. Return type float, arg1=float, arg2=int, arg3=int</param>
         public void ApplyFuncToMatrix(MatrixFunc2 func)
         {
             for (int i = 0; i < this.rows; i++)
@@ -353,6 +389,44 @@ namespace RCWNeuralNetwork
                     this.internalMatrix[i, j] = func(this.internalMatrix[i, j], i, j);
                 }
             }
+        }
+
+        /// <summary>
+        /// Takes in a function delegate of the signature 'float FuncName(float, int, int)' 
+        /// and applies the function to each value in the matrix. This returns a new matrix.
+        /// </summary>
+        /// <param name="func">Delegate function that is applied to each element in the matrix. Return type float, arg1=float, arg2=int, arg3=int</param>
+        /// <returns>New matrix returned that was passed in matrix with func applied to all values.</returns>
+        public static MyMatrix ApplyFuncToMatrix(MyMatrix mat, MatrixFunc1 func)
+        {
+            MyMatrix result = new MyMatrix(mat.rows, mat.cols);
+            for (int i = 0; i < result.rows; i++)
+            {
+                for (int j = 0; j < result.cols; j++)
+                {
+                    result.internalMatrix[i, j] = func(mat.internalMatrix[i, j]);
+                }
+            }
+            return result;
+        }
+
+        /// <summary>
+        /// Takes in a function delegate of the signature 'float FuncName(float, int, int)' 
+        /// and applies the function to each value in the matrix. This returns a new matrix.
+        /// </summary>
+        /// <param name="func">Delegate function that is applied to each element in the matrix. Return type float, arg1=float, arg2=int, arg3=int</param>
+        /// <returns>New matrix returned that was passed in matrix with func applied to all values.</returns>
+        public static MyMatrix ApplyFuncToMatrix(MyMatrix mat, MatrixFunc2 func)
+        {
+            MyMatrix result = new MyMatrix(mat.rows, mat.cols);
+            for (int i = 0; i < result.rows; i++)
+            {
+                for (int j = 0; j < result.cols; j++)
+                {
+                    result.internalMatrix[i, j] = func(mat.internalMatrix[i, j], i, j);
+                }
+            }
+            return result;
         }
 
         public static MyMatrix FromArray(float[] inputs, string label ="inputs")

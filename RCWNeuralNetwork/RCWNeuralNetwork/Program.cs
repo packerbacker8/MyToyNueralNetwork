@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
+
 namespace RCWNeuralNetwork
 {
     class Program
@@ -38,10 +39,61 @@ namespace RCWNeuralNetwork
             Console.WriteLine(d.ToString());
 
             NeuralNetwork nn = new NeuralNetwork(2, 2, 1);
-            float[] input = new float[] { 1, 0 };
-            float[] targets = new float[] { 1 };
+            float[][] inputs = new float[4][];
+            float[][] targets = new float[4][];
+            float num1 = 0;
+            float num2 = 0;
+            for (int i = 0; i < inputs.Length; i++)
+            {
+                inputs[i] = new float[2];
+                targets[i] = new float[1];
+                targets[i][0] = (num1 == 1 || num2 == 1) && i < inputs.Length - 1 ? 1 : 0;
 
-            nn.TrainNetwork(input, targets);
+                for (int j = 0; j < inputs[i].Length; j++)
+                {
+                    inputs[i][j] = j == 0 ? num1 : num2;
+                }
+                num2++;
+                if (num2 > 1)
+                {
+                    num2 = 0;
+                    num1++;
+                }
+            }
+
+            Random rand = new Random();
+            rand.Next();
+            for (int count = 0; count < 500000; count++)
+            {
+                for (int i = 0; i < inputs.Length; i++)
+                {
+                    int idx = rand.Next(0, 4);
+                    nn.TrainNetwork(inputs[idx], targets[idx]);
+                }
+
+                if(count % 10000 == 0)
+                {
+                    Console.WriteLine();
+                    float[] guessI = nn.FeedForward(new float[] { 0, 0 });
+                    Console.WriteLine(guessI[0]);
+                    guessI = nn.FeedForward(new float[] { 1, 0 });
+                    Console.WriteLine(guessI[0]);
+                    guessI = nn.FeedForward(new float[] { 0, 1 });
+                    Console.WriteLine(guessI[0]);
+                    guessI = nn.FeedForward(new float[] { 1, 1 });
+                    Console.WriteLine(guessI[0]);
+                }                
+            }
+            Console.WriteLine();
+            float[] guess = nn.FeedForward(new float[] { 0, 0 });
+            Console.WriteLine(guess[0]);
+            guess = nn.FeedForward(new float[] { 1, 0 });
+            Console.WriteLine(guess[0]);
+            guess = nn.FeedForward(new float[] { 0, 1 });
+            Console.WriteLine(guess[0]);
+            guess = nn.FeedForward(new float[] { 1, 1 });
+            Console.WriteLine(guess[0]);
+
             /*float[] output = nn.FeedForward(input);
             foreach(float ans in output)
             {

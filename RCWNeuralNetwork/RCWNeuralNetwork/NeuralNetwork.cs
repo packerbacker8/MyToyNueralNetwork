@@ -13,6 +13,8 @@ namespace RCWNeuralNetwork
         private int numHiddenLayers;
         private int numOutputNodes;
 
+        private float learningRate;
+
         private MyMatrix weightsInputHidden;
         //private MyMatrix[] weightsInputHidden;  //will need to set this up when doing many layers
         private MyMatrix weightsHiddenOutput;
@@ -28,6 +30,7 @@ namespace RCWNeuralNetwork
             numHiddenNodes = 2;
             numHiddenLayers = 1;
             numOutputNodes = 1;
+            learningRate = 0.1f; 
             weightsInputHidden = new MyMatrix(numHiddenNodes, numInputNodes, "IH");
             /*weightsInputHidden = new MyMatrix[numHiddenLayers];
             for(int i = 0; i < numHiddenLayers; i++)
@@ -41,12 +44,13 @@ namespace RCWNeuralNetwork
             weightsHiddenOutput.RandomizeMatrix(2f, 1f);
         }
 
-        public NeuralNetwork(int numI, int numH, int numO, int layers = 1)
+        public NeuralNetwork(int numI, int numH, int numO, float rate = 0.1f, int layers = 1)
         {
             numInputNodes = numI;
             numHiddenNodes = numH;
             numOutputNodes = numO;
             numHiddenLayers = layers;
+            learningRate = rate;
             weightsInputHidden = new MyMatrix(numHiddenNodes, numInputNodes, "IH");
             /*weightsInputHidden = new MyMatrix[numHiddenLayers];
             for(int i = 0; i < numHiddenLayers; i++)
@@ -60,6 +64,15 @@ namespace RCWNeuralNetwork
             weightsHiddenOutput.RandomizeMatrix(2f, 1f);
             biasHidden.RandomizeMatrix(2f, 1f);
             biasOutput.RandomizeMatrix(2f, 1f);
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="rate"></param>
+        public void SetLearningRate(float rate)
+        {
+            learningRate = rate;
         }
 
         /// <summary>
@@ -86,27 +99,73 @@ namespace RCWNeuralNetwork
             return result.ToArray();
         }
 
-        public void TrainNetwork(float[] inputs, float[] targets)
+        
+        public void TrainNetwork(float[] inputsArr, float[] targetsArr)
         {
-            float[] output = this.FeedForward(inputs);
+            MyMatrix inputMat = MyMatrix.FromArray(inputsArr);
+            MyMatrix inputHidden = MyMatrix.MatrixProduct(this.weightsInputHidden, inputMat);
+            if (!inputHidden.AddTwoMatricies(this.biasHidden))
+            {
+                Console.WriteLine("matricies didn't add 1");
+            }
+            inputHidden.ApplyFuncToMatrix(SigmoidActivation);
 
+            MyMatrix outputMat = MyMatrix.MatrixProduct(this.weightsHiddenOutput, inputHidden);
+            if (!outputMat.AddTwoMatricies(this.biasOutput))
+            {
+                Console.WriteLine("matricies didn't add 2");
+            }
+            outputMat.ApplyFuncToMatrix(SigmoidActivation);
+            outputMat.SetName("outputs");
             //change to matricies
-            MyMatrix outputMat = MyMatrix.FromArray(output, "outputs");
-            MyMatrix targetMat = MyMatrix.FromArray(targets, "targets");
+            MyMatrix targetMat = MyMatrix.FromArray(targetsArr, "targets");
 
             //calculate error: Error = Targets - Outputs
-            MyMatrix errors = MyMatrix.SubtractTwoMatricies(targetMat, outputMat);
+            MyMatrix outputErrors = MyMatrix.SubtractTwoMatricies(targetMat, outputMat);
+            //calculate gradient
+            MyMatrix outputGradientMat = MyMatrix.ApplyFuncToMatrix(outputMat, FakeDerivativeOfSigmoid);
+            outputGradientMat.ElementWiseProduct(outputErrors);
+            outputGradientMat.ScaleMatrix(this.learningRate);
 
-            //transpose hidden output weights before getting hidden errors
+            //calculate deltas
+            MyMatrix hiddenTranspose = MyMatrix.TransposeMatrix(inputHidden);
+            MyMatrix weightHiddenOutputDeltas = MyMatrix.MatrixProduct(outputGradientMat, hiddenTranspose);
+
+            //adjust the weights by deltas
+            this.weightsHiddenOutput.AddTwoMatricies(weightHiddenOutputDeltas);
+            //adjust bias by gradient
+            this.biasOutput.AddTwoMatricies(outputGradientMat);
+
             MyMatrix weightsHiddenOutputTranspose = MyMatrix.TransposeMatrix(this.weightsHiddenOutput);
-            MyMatrix hiddenErrors = MyMatrix.MatrixProduct(weightsHiddenOutputTranspose, errors);
+            MyMatrix hiddenErrors = MyMatrix.MatrixProduct(weightsHiddenOutputTranspose, outputErrors);
+
+            //calculate hidden gradient
+            MyMatrix hiddenGradientMat = MyMatrix.ApplyFuncToMatrix(inputHidden, FakeDerivativeOfSigmoid);
+            hiddenGradientMat.ElementWiseProduct(hiddenErrors);
+            hiddenGradientMat.ScaleMatrix(this.learningRate);
+
+            //calculate input to hidden deltas
+            MyMatrix inputsTransposed = MyMatrix.TransposeMatrix(inputMat);
+            MyMatrix weightsInputHiddenDeltas = MyMatrix.MatrixProduct(hiddenGradientMat, inputsTransposed);
+
+            //adjust the weights by deltas
+            this.weightsInputHidden.AddTwoMatricies(weightsInputHiddenDeltas);
+            //adjust bias by gradient
+            this.biasHidden.AddTwoMatricies(hiddenGradientMat);
         }
 
 
+        #region Activation Functions
         /*ACTIVIATION FUNCTIONS*/
         public static float SigmoidActivation(float x)
         {
             return 1 / (1 + (float)Math.Exp(-x));
         }
+
+        public static float FakeDerivativeOfSigmoid(float x)
+        {
+            return x * (1 - x);
+        }
+        #endregion
     }
 }
