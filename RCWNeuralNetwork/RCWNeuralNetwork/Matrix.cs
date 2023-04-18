@@ -1,14 +1,13 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace RCWNeuralNetwork
 {
 
-    class MyMatrix
+    public class Matrix
     {
+        public int Rows => rows;
+        public int Columns => cols;
+
         private int rows;
         private int cols;
         private float[,] internalMatrix;
@@ -16,15 +15,16 @@ namespace RCWNeuralNetwork
         private static Random rand = new Random();
 
 
-        public MyMatrix(int gRows, int gCols, string name ="")
+        public Matrix(int gRows, int gCols, string name ="")
         {
             rows = gRows;
             cols = gCols;
             internalMatrix = new float[rows, cols];
             this.name = name;
+            rand.Next();
         }
 
-        public MyMatrix(int gRows, int gCols, float startVal, string name= "")
+        public Matrix(int gRows, int gCols, float startVal, string name= "")
         {
             rows = gRows;
             cols = gCols;
@@ -37,6 +37,7 @@ namespace RCWNeuralNetwork
                 }
             }
             this.name = name;
+            rand.Next();
         }
 
         /// <summary>
@@ -179,7 +180,7 @@ namespace RCWNeuralNetwork
         /// </summary>
         /// <param name="other">Other matrix being added to this matrix</param>
         /// <returns>True if successful, false if the dimensions weren't equal</returns>
-        public bool AddTwoMatricies(MyMatrix other)
+        public bool AddTwoMatricies(Matrix other)
         {
             if (other.rows != this.rows || other.cols != this.cols)
             {
@@ -204,14 +205,14 @@ namespace RCWNeuralNetwork
         /// <param name="first">Matrix to be subtracted from.</param>
         /// <param name="second">Matrix values that are doing the subtracting.</param>
         /// <returns>A new matrix where first - second happens.</returns>
-        public static MyMatrix SubtractTwoMatricies(MyMatrix first, MyMatrix second)
+        public static Matrix SubtractTwoMatricies(Matrix first, Matrix second)
         {
             if (first.rows != second.rows || first.cols != second.cols)
             {
                 //does nothing as they are not the same dimension
                 return null;
             }
-            MyMatrix result = new MyMatrix(first.rows, first.cols, first.name + "-" + second.name);
+            Matrix result = new Matrix(first.rows, first.cols, first.name + "-" + second.name);
             for (int i = 0; i < result.rows; i++)
             {
                 for (int j = 0; j < result.cols; j++)
@@ -223,7 +224,7 @@ namespace RCWNeuralNetwork
             return result;
         }
 
-        public void ElementWiseProduct(MyMatrix other)
+        public void ElementWiseProduct(Matrix other)
         {
             if (this.rows != other.rows || this.cols != other.cols)
             {
@@ -240,14 +241,14 @@ namespace RCWNeuralNetwork
             }
         }
 
-        public static MyMatrix ElementWiseProduct(MyMatrix first, MyMatrix second)
+        public static Matrix ElementWiseProduct(Matrix first, Matrix second)
         {
             if (first.rows != second.rows || first.cols != second.cols)
             {
                 //does nothing as they are not the same dimension
                 return null;
             }
-            MyMatrix result = new MyMatrix(first.rows, first.cols, first.name + "_times_" + second.name);
+            Matrix result = new Matrix(first.rows, first.cols, first.name + "_times_" + second.name);
             for (int i = 0; i < result.rows; i++)
             {
                 for (int j = 0; j < result.cols; j++)
@@ -267,13 +268,13 @@ namespace RCWNeuralNetwork
         /// </summary>
         /// <param name="other">Matrix that is passed in to have applied to this current matrix.</param>
         /// <returns>New matrix that has the dot product applied to each of its vectors.</returns>
-        public MyMatrix MatrixProduct(MyMatrix other)
+        public Matrix MatrixProduct(Matrix other)
         {
             if(this.cols != other.rows)
             {
                 return null;
             }
-            MyMatrix result = new MyMatrix(this.rows, other.cols);
+            Matrix result = new Matrix(this.rows, other.cols);
             for (int i = 0; i < result.rows; i++)
             {
                 for (int j = 0; j < result.cols; j++)
@@ -295,13 +296,13 @@ namespace RCWNeuralNetwork
         /// <param name="matrix1"></param>
         /// <param name="matrix2"></param>
         /// <returns></returns>
-        public static MyMatrix MatrixProduct(MyMatrix matrix1, MyMatrix matrix2)
+        public static Matrix MatrixProduct(Matrix matrix1, Matrix matrix2)
         {
             if (matrix1.cols != matrix2.rows)
             {
                 return null;
             }
-            MyMatrix result = new MyMatrix(matrix1.rows, matrix2.cols);
+            Matrix result = new Matrix(matrix1.rows, matrix2.cols);
             for (int i = 0; i < result.rows; i++)
             {
                 for (int j = 0; j < result.cols; j++)
@@ -322,7 +323,7 @@ namespace RCWNeuralNetwork
         /// </summary>
         public void TransposeMatrix()
         {
-            MyMatrix result = new MyMatrix(this.cols, this.rows, this.name);
+            Matrix result = new Matrix(this.cols, this.rows, this.name);
             for (int i = 0; i < this.rows; i++)
             {
                 for (int j = 0; j < this.cols; j++)
@@ -340,9 +341,9 @@ namespace RCWNeuralNetwork
         /// Rotate matrix so that rows are now columns.
         /// </summary>
         /// <returns>New matrix that has rows which are equal to original matrix columns and the same for the new columns.</returns>
-        public static MyMatrix TransposeMatrix(MyMatrix given)
+        public static Matrix TransposeMatrix(Matrix given)
         {
-            MyMatrix result = new MyMatrix(given.cols, given.rows, given.name);
+            Matrix result = new Matrix(given.cols, given.rows, given.name);
             for (int i = 0; i < given.rows; i++)
             {
                 for (int j = 0; j < given.cols; j++)
@@ -354,7 +355,6 @@ namespace RCWNeuralNetwork
         }
 
         public delegate float MatrixFunc2(float val, int i, int j);
-        public delegate float MatrixFunc1(float val);
 
 
         /// <summary>
@@ -363,7 +363,7 @@ namespace RCWNeuralNetwork
         /// operation.
         /// </summary>
         /// <param name="func">Delegate function that is applied to each element in the matrix. Return type float, arg1=float, arg2=int, arg3=int</param>
-        public void ApplyFuncToMatrix(MatrixFunc1 func)
+        public void Apply(ActivationFunction func)
         {
             for (int i = 0; i < this.rows; i++)
             {
@@ -380,7 +380,7 @@ namespace RCWNeuralNetwork
         /// operation.
         /// </summary>
         /// <param name="func">Delegate function that is applied to each element in the matrix. Return type float, arg1=float, arg2=int, arg3=int</param>
-        public void ApplyFuncToMatrix(MatrixFunc2 func)
+        public void Apply(MatrixFunc2 func)
         {
             for (int i = 0; i < this.rows; i++)
             {
@@ -397,9 +397,9 @@ namespace RCWNeuralNetwork
         /// </summary>
         /// <param name="func">Delegate function that is applied to each element in the matrix. Return type float, arg1=float, arg2=int, arg3=int</param>
         /// <returns>New matrix returned that was passed in matrix with func applied to all values.</returns>
-        public static MyMatrix ApplyFuncToMatrix(MyMatrix mat, MatrixFunc1 func)
+        public static Matrix Apply(Matrix mat, ActivationFunction func)
         {
-            MyMatrix result = new MyMatrix(mat.rows, mat.cols);
+            Matrix result = new Matrix(mat.rows, mat.cols);
             for (int i = 0; i < result.rows; i++)
             {
                 for (int j = 0; j < result.cols; j++)
@@ -416,9 +416,9 @@ namespace RCWNeuralNetwork
         /// </summary>
         /// <param name="func">Delegate function that is applied to each element in the matrix. Return type float, arg1=float, arg2=int, arg3=int</param>
         /// <returns>New matrix returned that was passed in matrix with func applied to all values.</returns>
-        public static MyMatrix ApplyFuncToMatrix(MyMatrix mat, MatrixFunc2 func)
+        public static Matrix Apply(Matrix mat, MatrixFunc2 func)
         {
-            MyMatrix result = new MyMatrix(mat.rows, mat.cols);
+            Matrix result = new Matrix(mat.rows, mat.cols);
             for (int i = 0; i < result.rows; i++)
             {
                 for (int j = 0; j < result.cols; j++)
@@ -429,9 +429,15 @@ namespace RCWNeuralNetwork
             return result;
         }
 
-        public static MyMatrix FromArray(float[] inputs, string label ="inputs")
+        /// <summary>
+        /// Creates an <see cref="Matrix"/> object from the float array as a single column matrix.
+        /// </summary>
+        /// <param name="inputs">Input values of matrix.</param>
+        /// <param name="label">Name of the matrix (optional).</param>
+        /// <returns><see cref="Matrix"/> object as a single column of given float array.</returns>
+        public static Matrix FromArray(float[] inputs, string label = "")
         {
-            MyMatrix output = new MyMatrix(inputs.Length, 1, label);
+            Matrix output = new Matrix(inputs.Length, 1, label);
             for (int i = 0; i < inputs.Length; i++)
             {
                 output.internalMatrix[i, 0] = inputs[i];
@@ -452,23 +458,6 @@ namespace RCWNeuralNetwork
             return res;
         }
 
-        /// <summary>
-        /// Number of rows in the matrix.
-        /// </summary>
-        /// <returns>Number of rows in the matrix.</returns>
-        public int Rows()
-        {
-            return rows;
-        }
-
-        /// <summary>
-        /// Number of columns in the matrix.
-        /// </summary>
-        /// <returns>Number of columns in the matrix.</returns>
-        public int Columns()
-        {
-            return cols;
-        }
 
         public override string ToString()
         {
@@ -485,9 +474,9 @@ namespace RCWNeuralNetwork
             return answer;
         }
 
-        public static MyMatrix operator+(MyMatrix left, MyMatrix right)
+        public static Matrix operator+(Matrix left, Matrix right)
         {
-            MyMatrix output = new MyMatrix(left.rows, left.cols);
+            Matrix output = new Matrix(left.rows, left.cols);
             for (int i = 0; i < output.rows; i++)
             {
                 for (int j = 0; j < output.cols; j++)
@@ -498,9 +487,14 @@ namespace RCWNeuralNetwork
             return output;
         }
 
-        public static MyMatrix operator -(MyMatrix left, MyMatrix right)
+        public static Matrix operator -(Matrix left, Matrix right)
         {
-            MyMatrix output = new MyMatrix(left.rows, left.cols);
+            if (left.rows != right.rows || left.cols != right.cols)
+            {
+                //does nothing as they are not the same dimension
+                return null;
+            }
+            Matrix output = new Matrix(left.rows, left.cols, left.name + "-" + right.name);
             for (int i = 0; i < output.rows; i++)
             {
                 for (int j = 0; j < output.cols; j++)
@@ -511,137 +505,4 @@ namespace RCWNeuralNetwork
             return output;
         }
     }
-
-    /*
-    class MyMatrix<T>
-    {
-        private int rows;
-        private int cols;
-        private T[,] internalMatrix;
-
-        public MyMatrix(int gRows, int gCols)
-        {
-            rows = gRows;
-            cols = gCols;
-            internalMatrix = new T[rows, cols];
-        }
-
-        public MyMatrix(int gRows, int gCols, T startVal)
-        {
-            rows = gRows;
-            cols = gCols;
-            internalMatrix = new T[rows, cols];
-            for (int i = 0; i < rows; i++)
-            {
-                for (int j = 0; j < cols; j++)
-                {
-                    internalMatrix[i,j] = startVal;
-                }
-            }
-        }
-
-        public void RandomizeMatrix()
-        {
-            for (int i = 0; i < rows; i++)
-            {
-                for (int j = 0; j < cols; j++)
-                {
-                    internalMatrix[i, j] = startVal;
-                }
-            }
-        }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="val"></param>
-        /// <param name="iIdx"></param>
-        /// <param name="jIdx"></param>
-        public void SetValue(T val, int iIdx, int jIdx)
-        {
-            internalMatrix[iIdx, jIdx] = val;
-        }
-
-        public T GetValue(int iIdx, int jIdx)
-        {
-            return internalMatrix[iIdx, jIdx];
-        }
-
-        public void ScaleMatrix(T n)
-        {
-            for (int i = 0; i < rows; i++)
-            {
-                for (int j = 0; j < cols; j++)
-                {
-                    dynamic curVal = internalMatrix[i, j];
-                    dynamic nVal = n;
-                    internalMatrix[i, j] = curVal * nVal;
-                }
-            }
-        }
-
-        public void AddConstant(T n)
-        {
-            for (int i = 0; i < rows; i++)
-            {
-                for (int j = 0; j < cols; j++)
-                {
-                    dynamic curVal = internalMatrix[i, j];
-                    dynamic nVal = n;
-                    internalMatrix[i, j] = curVal + nVal;
-                }
-            }
-        }
-
-        /// <summary>
-        /// Adds matricies element wise. Affects the one the method is called on.
-        /// Only works if dimensions are the same.
-        /// </summary>
-        /// <param name="other">Other matrix being added to this matrix</param>
-        /// <returns>True if successful, false if the dimensions weren't equal</returns>
-        public bool AddTwoMatricies(MyMatrix<T> other)
-        {
-            if(other.rows != this.rows || other.cols != this.cols)
-            {
-                //does nothing as they are not the same dimension
-                return false;
-            }
-            for (int i = 0; i < rows; i++)
-            {
-                for (int j = 0; j < cols; j++)
-                {
-                    dynamic firstVal = this.internalMatrix[i, j];
-                    dynamic secodVal = other.internalMatrix[i,j];
-                    this.internalMatrix[i, j] = firstVal + secodVal;
-                }
-            }
-            return true;
-        }
-
-        public int Rows()
-        {
-            return rows;
-        }
-
-        public int Columns()
-        {
-            return cols;
-        }
-
-        public override string ToString()
-        {
-            string answer = "Matrix: \n";
-            for (int i = 0; i < rows; i++)
-            {
-                answer += i + ": ";
-                for (int j = 0; j < cols; j++)
-                {
-                    dynamic val = internalMatrix[i, j];
-                    answer += val + " ";
-                }
-                answer += "\n";
-            }
-            return answer;
-        }
-    }*/
 }
